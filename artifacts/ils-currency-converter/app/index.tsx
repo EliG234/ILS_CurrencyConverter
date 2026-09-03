@@ -169,53 +169,30 @@ export default function CurrencyConverterScreen() {
       >
         <Pressable onPress={Keyboard.dismiss} style={styles.pressableContent}>
           <View style={styles.header}>
-            <View>
-              <View style={styles.eyebrowRow}>
-                <View style={[styles.liveDot, { backgroundColor: colors.success }]} />
-                <Text style={[styles.eyebrow, { color: colors.success }]}>
-                  LIVE MARKET RATES
-                </Text>
-              </View>
-              <Text style={[styles.title, { color: colors.foreground }]}>
-                ILS converter
-              </Text>
-              <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>
-                See what your money is worth in shekels.
+            <View style={styles.eyebrowRow}>
+              <View style={[styles.liveDot, { backgroundColor: colors.success }]} />
+              <Text style={[styles.eyebrow, { color: colors.success }]}>
+                LIVE MARKET RATES
               </Text>
             </View>
-            <View style={[styles.headerIcon, { backgroundColor: colors.accent }]}>
-              <Ionicons name="swap-vertical" size={22} color={colors.accentForeground} />
-            </View>
+            <Text style={[styles.title, { color: colors.foreground }]}>
+              ILS converter
+            </Text>
+            <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>
+              See what your money is worth in shekels.
+            </Text>
           </View>
 
           <View style={[styles.amountPanel, { backgroundColor: colors.primary }]}>
-            <View style={styles.amountPanelHeader}>
-              <Text
-                style={[
-                  styles.amountLabel,
-                  { color: `${colors.primaryForeground}B8` },
-                ]}
-              >
-                AMOUNT TO CONVERT
-              </Text>
-              <View
-                style={[
-                  styles.currencyPill,
-                  { backgroundColor: colors.primaryForeground },
-                ]}
-              >
-                <Text style={[styles.currencyPillText, { color: colors.primary }]}>
-                  USD
-                </Text>
-                <Ionicons name="chevron-down" size={14} color={colors.primary} />
-              </View>
-            </View>
+            <Text
+              style={[
+                styles.amountLabel,
+                { color: `${colors.primaryForeground}B8` },
+              ]}
+            >
+              AMOUNT TO CONVERT
+            </Text>
             <View style={styles.amountInputRow}>
-              <Text
-                style={[styles.amountCurrency, { color: colors.primaryForeground }]}
-              >
-                $
-              </Text>
               <TextInput
                 testID="amount-input"
                 value={amountText}
@@ -237,13 +214,8 @@ export default function CurrencyConverterScreen() {
                 placeholder="1"
                 placeholderTextColor={`${colors.primaryForeground}99`}
                 style={[styles.amountInput, { color: colors.primaryForeground }]}
-                accessibilityLabel="Amount in US dollars"
+                accessibilityLabel="Amount to convert"
               />
-              <Text
-                style={[styles.amountCode, { color: `${colors.primaryForeground}99` }]}
-              >
-                USD
-              </Text>
             </View>
             <Text
               style={[styles.amountHint, { color: `${colors.primaryForeground}A8` }]}
@@ -354,9 +326,6 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
     marginBottom: 26,
   },
   eyebrowRow: {
@@ -385,51 +354,21 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginTop: 6,
   },
-  headerIcon: {
-    width: 46,
-    height: 46,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 2,
-  },
   amountPanel: {
     borderRadius: 24,
     padding: 20,
     marginBottom: 28,
-  },
-  amountPanelHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
   },
   amountLabel: {
     fontFamily: 'Inter_700Bold',
     fontSize: 10,
     letterSpacing: 1.2,
   },
-  currencyPill: {
-    borderRadius: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    paddingHorizontal: 10,
-    paddingVertical: 7,
-  },
-  currencyPillText: {
-    fontFamily: 'Inter_700Bold',
-    fontSize: 11,
-    letterSpacing: 0.6,
-  },
   amountInputRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     marginTop: 12,
-  },
-  amountCurrency: {
-    fontFamily: 'Inter_500Medium',
-    fontSize: 35,
-    marginRight: 8,
   },
   amountInput: {
     flex: 1,
@@ -438,12 +377,7 @@ const styles = StyleSheet.create({
     letterSpacing: -1.5,
     minWidth: 80,
     padding: 0,
-  },
-  amountCode: {
-    fontFamily: 'Inter_600SemiBold',
-    fontSize: 13,
-    letterSpacing: 0.8,
-    marginLeft: 8,
+    textAlign: 'center',
   },
   amountHint: {
     fontFamily: 'Inter_400Regular',
