@@ -1,0 +1,1 @@
+- [Frankfurter rate proxy](rates-api-cors.md) — proxy public rate requests server-side so native and browser Expo surfaces share one reliable path.

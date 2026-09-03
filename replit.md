@@ -1,10 +1,11 @@
-# [Project name]
+# ILS Currency Converter
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+A mobile Expo app that fetches live market rates and instantly converts USD and EUR amounts into Israeli New Shekels.
 
 ## Run & Operate
 
 - `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
+- `pnpm --filter @workspace/ils-currency-converter run dev` — run the Expo mobile preview
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — typecheck + build all packages
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
@@ -22,23 +23,29 @@ _Replace the heading above with the project's name, and this line with one sente
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/ils-currency-converter/app/index.tsx` — converter screen, input handling, and live rate display
+- `artifacts/ils-currency-converter/constants/colors.ts` — light and dark semantic theme tokens
+- `artifacts/api-server/src/routes/rates.ts` — server-side Frankfurter proxy and USD/ILS derivation
+- `lib/api-spec/openapi.yaml` — source of truth for the `/api/rates` contract
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- The app is a single-screen Expo Router app with no tabs because conversion is the core task.
+- Frankfurter is called from the API server to avoid browser CORS restrictions; the client consumes the generated API hook.
+- USD to ILS is derived as the EUR-to-ILS rate divided by the EUR-to-USD rate because Frankfurter defaults to EUR.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+Users enter a USD amount and see live USD-to-ILS and EUR-to-ILS totals update immediately. The screen includes auto-load, manual refresh, loading and error states, and a last-updated time.
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+- Clean, modern, minimalist mobile UI with rounded cards, soft background colors, and large legible currency values.
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- The Expo app needs `EXPO_PUBLIC_DOMAIN` to reach the shared API server in native bundles; the managed workflow injects it automatically.
+- Keep the Frankfurter request server-side so web previews do not hit its missing CORS headers.
 
 ## Pointers
 

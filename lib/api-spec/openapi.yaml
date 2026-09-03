@@ -24,6 +24,25 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /rates:
+    get:
+      operationId: getRates
+      tags: [rates]
+      summary: Get current USD and EUR rates in ILS
+      description: Fetches EUR-based rates from Frankfurter and derives the USD to ILS rate.
+      responses:
+        "200":
+          description: Current currency rates
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExchangeRates"
+        "502":
+          description: Upstream rates service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
   schemas:
     HealthStatus:
@@ -33,4 +52,27 @@ components:
           type: string
       required:
         - status
+    ExchangeRates:
+      type: object
+      properties:
+        usdToIls:
+          type: number
+        eurToIls:
+          type: number
+        date:
+          type: string
+        base:
+          type: string
+      required:
+        - usdToIls
+        - eurToIls
+        - date
+        - base
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+        - message
 
