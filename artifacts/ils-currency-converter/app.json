@@ -8,13 +8,49 @@
     "scheme": "ils-currency-converter",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "supportsTablet": false
+      "supportsTablet": false,
+      "bundleIdentifier": "com.ilscurrencyconverter.app"
     },
-    "android": {},
+    "android": {
+      "package": "com.ilscurrencyconverter.app"
+    },
     "web": {
       "favicon": "./assets/images/icon.png"
     },
-    "plugins": ["expo-router"],
+    "plugins": [
+      "expo-router",
+      [
+        "react-native-android-widget",
+        {
+          "widgets": [
+            {
+              "name": "ILSRateWidget",
+              "label": "ILS Rates",
+              "description": "Live US dollar and euro rates in Israeli shekels.",
+              "minWidth": "250dp",
+              "minHeight": "150dp",
+              "resizeMode": "horizontal|vertical",
+              "updatePeriodMillis": 1800000
+            }
+          ]
+        }
+      ],
+      [
+        "expo-widgets",
+        {
+          "bundleIdentifier": "com.ilscurrencyconverter.app.ExpoWidgetsTarget",
+          "groupIdentifier": "group.com.ilscurrencyconverter.app",
+          "widgets": [
+            {
+              "name": "ILSRateWidget",
+              "displayName": "ILS Rates",
+              "description": "Live US dollar and euro rates in Israeli shekels.",
+              "supportedFamilies": ["systemSmall", "systemMedium"]
+            }
+          ]
+        }
+      ]
+    ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true

@@ -1,1 +1,2 @@
 - [Frankfurter rate proxy](rates-api-cors.md) — proxy public rate requests server-side so native and browser Expo surfaces share one reliable path.
+- [Native widget builds](native-widgets.md) — home-screen widgets need native development builds; Expo Go preview cannot load or verify widget extensions.

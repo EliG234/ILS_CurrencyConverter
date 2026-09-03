@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Keyboard,
@@ -131,6 +131,26 @@ export default function CurrencyConverterScreen() {
     ? 'We could not update the rates. Check your connection and try again.'
     : null;
   const lastUpdated = dataUpdatedAt ? new Date(dataUpdatedAt) : null;
+
+  useEffect(() => {
+    if (!rates) return;
+
+    const widgetRates = {
+      usdToIls: rates.usdToIls,
+      eurToIls: rates.eurToIls,
+      updatedAt: rates.date,
+    };
+
+    if (Platform.OS === 'android') {
+      void import('../widgets/android/update')
+        .then(({ updateAndroidRateWidget }) => updateAndroidRateWidget(widgetRates))
+        .catch(() => undefined);
+    } else if (Platform.OS === 'ios') {
+      void import('../widgets/ios/update')
+        .then(({ updateIosRateWidget }) => updateIosRateWidget(widgetRates))
+        .catch(() => undefined);
+    }
+  }, [rates]);
 
   return (
     <KeyboardAvoidingView

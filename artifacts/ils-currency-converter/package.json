@@ -2,7 +2,7 @@
   "name": "@workspace/ils-currency-converter",
   "version": "0.0.0",
   "private": true,
-  "main": "expo-router/entry",
+  "main": "index.ts",
   "scripts": {
     "dev": "sh -c 'if [ -n \"$REPLIT_EXPO_SESSION_SECRET\" ]; then pnpm exec create-launch login --session \"$REPLIT_EXPO_SESSION_SECRET\" || true; fi' && EXPO_PACKAGER_PROXY_URL=https://$REPLIT_EXPO_DEV_DOMAIN EXPO_PUBLIC_DOMAIN=$REPLIT_DEV_DOMAIN EXPO_PUBLIC_REPL_ID=$REPL_ID REACT_NATIVE_PACKAGER_HOSTNAME=$REPLIT_DEV_DOMAIN pnpm exec expo start --localhost --port $PORT",
     "build": "node scripts/build.js",
@@ -53,5 +53,10 @@
     "typescript": "~6.0.3",
     "zod": "catalog:",
     "zod-validation-error": "^3.4.0"
+  },
+  "dependencies": {
+    "@expo/ui": "~57.0.15",
+    "expo-widgets": "~57.0.16",
+    "react-native-android-widget": "^0.20.3"
   }
 }

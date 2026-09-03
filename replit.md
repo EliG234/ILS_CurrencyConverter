@@ -24,6 +24,7 @@ A mobile Expo app that fetches live market rates and instantly converts USD and 
 ## Where things live
 
 - `artifacts/ils-currency-converter/app/index.tsx` — converter screen, input handling, and live rate display
+- `artifacts/ils-currency-converter/widgets/` — Android and iOS home-screen widget renderers and rate sync
 - `artifacts/ils-currency-converter/constants/colors.ts` — light and dark semantic theme tokens
 - `artifacts/api-server/src/routes/rates.ts` — server-side Frankfurter proxy and USD/ILS derivation
 - `lib/api-spec/openapi.yaml` — source of truth for the `/api/rates` contract
@@ -33,6 +34,7 @@ A mobile Expo app that fetches live market rates and instantly converts USD and 
 - The app is a single-screen Expo Router app with no tabs because conversion is the core task.
 - Frankfurter is called from the API server to avoid browser CORS restrictions; the client consumes the generated API hook.
 - USD to ILS is derived as the EUR-to-ILS rate divided by the EUR-to-USD rate because Frankfurter defaults to EUR.
+- Home-screen widgets use the dedicated Android widget provider and Expo WidgetKit target; native development builds are required because Expo Go cannot load widget modules.
 
 ## Product
 
