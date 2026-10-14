@@ -217,11 +217,6 @@ export default function CurrencyConverterScreen() {
                 accessibilityLabel="Amount to convert"
               />
             </View>
-            <Text
-              style={[styles.amountHint, { color: `${colors.primaryForeground}A8` }]}
-            >
-              Updates instantly as you type
-            </Text>
           </View>
 
           <View style={styles.sectionHeading}>
@@ -230,12 +225,7 @@ export default function CurrencyConverterScreen() {
                 Your conversion
               </Text>
               <Text style={[styles.sectionSubtitle, { color: colors.mutedForeground }]}>
-                Based on the latest available rate
-              </Text>
-            </View>
-            <View style={[styles.rateSourceBadge, { backgroundColor: colors.softHighlight }]}>
-              <Text style={[styles.rateSourceText, { color: colors.eurAccent }]}>
-                EUR base
+                Latest USD and EUR rates
               </Text>
             </View>
           </View>
@@ -326,13 +316,13 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   header: {
-    marginBottom: 26,
+    marginBottom: 18,
   },
   eyebrowRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 7,
-    marginBottom: 10,
+    marginBottom: 6,
   },
   liveDot: {
     width: 7,
@@ -346,18 +336,18 @@ const styles = StyleSheet.create({
   },
   title: {
     fontFamily: 'Inter_700Bold',
-    fontSize: 32,
+    fontSize: 29,
     letterSpacing: -1.1,
   },
   subtitle: {
     fontFamily: 'Inter_400Regular',
-    fontSize: 14,
-    marginTop: 6,
+    fontSize: 13,
+    marginTop: 3,
   },
   amountPanel: {
-    borderRadius: 24,
-    padding: 20,
-    marginBottom: 28,
+    borderRadius: 22,
+    padding: 16,
+    marginBottom: 18,
   },
   amountLabel: {
     fontFamily: 'Inter_700Bold',
@@ -368,54 +358,39 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 12,
+    marginTop: 6,
   },
   amountInput: {
     flex: 1,
     fontFamily: 'Inter_700Bold',
-    fontSize: 44,
+    fontSize: 40,
     letterSpacing: -1.5,
     minWidth: 80,
     padding: 0,
     textAlign: 'center',
   },
-  amountHint: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 12,
-    marginTop: 10,
-  },
   sectionHeading: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-end',
-    marginBottom: 14,
+    alignItems: 'center',
+    marginBottom: 10,
   },
   sectionTitle: {
     fontFamily: 'Inter_700Bold',
-    fontSize: 19,
+    fontSize: 18,
     letterSpacing: -0.3,
   },
   sectionSubtitle: {
     fontFamily: 'Inter_400Regular',
-    fontSize: 12,
-    marginTop: 4,
-  },
-  rateSourceBadge: {
-    borderRadius: 8,
-    paddingHorizontal: 9,
-    paddingVertical: 6,
-  },
-  rateSourceText: {
-    fontFamily: 'Inter_700Bold',
-    fontSize: 10,
-    letterSpacing: 0.5,
+    fontSize: 11,
+    marginTop: 2,
   },
   cards: {
-    gap: 14,
+    gap: 10,
   },
   rateCard: {
-    borderRadius: 22,
-    padding: 18,
+    borderRadius: 19,
+    padding: 14,
     overflow: 'hidden',
     elevation: 2,
   },
@@ -437,66 +412,66 @@ const styles = StyleSheet.create({
     gap: 11,
   },
   currencyIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 13,
+    width: 34,
+    height: 34,
+    borderRadius: 11,
     alignItems: 'center',
     justifyContent: 'center',
   },
   currencySymbol: {
     fontFamily: 'Inter_700Bold',
-    fontSize: 20,
+    fontSize: 18,
   },
   currencyCode: {
     fontFamily: 'Inter_700Bold',
-    fontSize: 16,
+    fontSize: 15,
     letterSpacing: 0.3,
   },
   currencyPair: {
     fontFamily: 'Inter_400Regular',
-    fontSize: 11,
-    marginTop: 2,
+    fontSize: 10,
+    marginTop: 1,
   },
   rateLine: {
     flexDirection: 'row',
     alignItems: 'baseline',
-    marginTop: 17,
-    gap: 6,
+    marginTop: 9,
+    gap: 5,
   },
   ratePrefix: {
     fontFamily: 'Inter_500Medium',
-    fontSize: 14,
+    fontSize: 13,
   },
   rateValue: {
     fontFamily: 'Inter_700Bold',
-    fontSize: 21,
+    fontSize: 19,
     letterSpacing: -0.3,
   },
   loadingRate: {
-    height: 24,
+    height: 22,
     justifyContent: 'center',
   },
   cardDivider: {
     height: 1,
-    marginVertical: 14,
+    marginVertical: 8,
   },
   totalCaption: {
     fontFamily: 'Inter_500Medium',
-    fontSize: 11,
+    fontSize: 10,
     letterSpacing: 0.4,
     textTransform: 'uppercase',
   },
   totalValue: {
     fontFamily: 'Inter_700Bold',
-    fontSize: 34,
-    letterSpacing: -1,
-    marginTop: 3,
+    fontSize: 29,
+    letterSpacing: -0.8,
+    marginTop: 1,
   },
   totalSkeleton: {
     borderRadius: 6,
-    height: 39,
-    marginTop: 3,
-    width: 150,
+    height: 33,
+    marginTop: 1,
+    width: 132,
   },
   errorBox: {
     alignItems: 'center',
@@ -504,8 +479,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     flexDirection: 'row',
     gap: 9,
-    marginTop: 16,
-    padding: 13,
+    marginTop: 12,
+    padding: 10,
   },
   errorText: {
     flex: 1,
@@ -520,12 +495,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 9,
     justifyContent: 'center',
-    marginTop: 20,
-    minHeight: 52,
+    marginTop: 12,
+    minHeight: 46,
   },
   refreshText: {
     fontFamily: 'Inter_700Bold',
-    fontSize: 14,
+    fontSize: 13,
   },
   footer: {
     alignItems: 'center',
@@ -533,11 +508,11 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: 6,
     justifyContent: 'center',
-    marginTop: 20,
+    marginTop: 10,
   },
   updatedText: {
     fontFamily: 'Inter_400Regular',
-    fontSize: 11,
+    fontSize: 10,
   },
   footerDot: {
     borderRadius: 2,
