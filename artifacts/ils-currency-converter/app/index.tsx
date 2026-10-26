@@ -68,7 +68,6 @@ function RateCard({
             </Text>
           </View>
         </View>
-        <Ionicons name="arrow-up-outline" size={20} color={accent} />
       </View>
 
       <View style={styles.rateLine}>
