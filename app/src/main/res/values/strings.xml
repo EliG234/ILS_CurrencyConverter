@@ -1,0 +1,5 @@
+<resources>
+  <string name="app_name">ILS Currency Converter</string>
+  <string name="expo_system_ui_user_interface_style" translatable="false">automatic</string>
+  <string name="widget_ilsratewidget_description" translatable="false">Live US dollar and euro rates in Israeli shekels.</string>
+</resources>
