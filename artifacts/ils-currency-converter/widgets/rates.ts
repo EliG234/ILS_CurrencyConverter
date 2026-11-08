@@ -2,6 +2,8 @@ export type WidgetRates = {
   usdToIls: number;
   eurToIls: number;
   updatedAt: string;
+  rateDate: string;
+  amount: number;
 };
 
 function getApiBaseUrl() {
@@ -12,7 +14,7 @@ function getApiBaseUrl() {
   return `https://${domain}`;
 }
 
-export async function fetchWidgetRates(): Promise<WidgetRates> {
+export async function fetchWidgetRates(amount = 1): Promise<WidgetRates> {
   const response = await fetch(`${getApiBaseUrl()}/api/rates`);
   if (!response.ok) {
     throw new Error(`Rates request failed with status ${response.status}.`);
@@ -21,11 +23,11 @@ export async function fetchWidgetRates(): Promise<WidgetRates> {
   const payload = (await response.json()) as Partial<WidgetRates> & {
     date?: string;
   };
-  const updatedAt = payload.updatedAt ?? payload.date;
+  const rateDate = payload.rateDate ?? payload.date;
   if (
     typeof payload.usdToIls !== 'number' ||
     typeof payload.eurToIls !== 'number' ||
-    typeof updatedAt !== 'string'
+    typeof rateDate !== 'string'
   ) {
     throw new Error('Rates response did not contain the expected values.');
   }
@@ -33,7 +35,9 @@ export async function fetchWidgetRates(): Promise<WidgetRates> {
   return {
     usdToIls: payload.usdToIls,
     eurToIls: payload.eurToIls,
-    updatedAt,
+    updatedAt: new Date().toISOString(),
+    rateDate,
+    amount,
   };
 }
 
@@ -46,4 +50,20 @@ export function formatWidgetTime(updatedAt: string) {
     hour: '2-digit',
     minute: '2-digit',
   });
+}
+
+export function formatWidgetDate(rateDate: string) {
+  const [year, month, day] = rateDate.split('-').map(Number);
+  if (!year || !month || !day) return rateDate;
+
+  return new Intl.DateTimeFormat([], {
+    day: 'numeric',
+    month: 'short',
+  }).format(new Date(year, month - 1, day));
+}
+
+export function formatWidgetAmount(amount: number) {
+  return new Intl.NumberFormat('en-US', {
+    maximumFractionDigits: 2,
+  }).format(amount);
 }

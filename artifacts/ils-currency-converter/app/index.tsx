@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
+  AppState,
   ActivityIndicator,
   Keyboard,
   Platform,
@@ -19,12 +20,35 @@ import {
   useGetRates,
 } from '@workspace/api-client-react';
 import { useColors } from '@/hooks/useColors';
+import {
+  parseWidgetAmount,
+  readWidgetAmountText,
+  saveWidgetAmountText,
+} from '../widgets/amount';
 
 function formatAmount(value: number) {
   return new Intl.NumberFormat('en-US', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(value);
+}
+
+function isApiRates(value: unknown): value is {
+  usdToIls: number;
+  eurToIls: number;
+  date: string;
+} {
+  if (value === null || typeof value !== 'object') return false;
+
+  const rates = value as Record<string, unknown>;
+  return (
+    typeof rates.usdToIls === 'number' &&
+    Number.isFinite(rates.usdToIls) &&
+    typeof rates.eurToIls === 'number' &&
+    Number.isFinite(rates.eurToIls) &&
+    typeof rates.date === 'string' &&
+    rates.date.length > 0
+  );
 }
 
 function RateCard({
@@ -105,6 +129,7 @@ export default function CurrencyConverterScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const [amountText, setAmountText] = useState<string>('1');
+  const [amountLoaded, setAmountLoaded] = useState(false);
   const {
     data: rates,
     dataUpdatedAt,
@@ -115,41 +140,100 @@ export default function CurrencyConverterScreen() {
     query: {
       queryKey: getGetRatesQueryKey(),
       refetchOnMount: 'always',
+      refetchInterval: 6 * 60 * 60 * 1000,
+      refetchIntervalInBackground: false,
       staleTime: 0,
     },
   });
+  const ratesAreValid = isApiRates(rates);
 
   const amount = useMemo(() => {
-    const parsed = Number.parseFloat(amountText);
-    return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0;
+    return parseWidgetAmount(amountText) ?? 0;
   }, [amountText]);
+
+  const appState = useRef(AppState.currentState);
+
+  useEffect(() => {
+    let isMounted = true;
+    void readWidgetAmountText()
+      .then((storedAmount) => {
+        if (isMounted) setAmountText(storedAmount);
+      })
+      .catch((cause: unknown) => {
+        console.warn('Unable to read the saved widget amount.', cause);
+      })
+      .finally(() => {
+        if (isMounted) setAmountLoaded(true);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!amountLoaded || parseWidgetAmount(amountText) === null) return;
+    void saveWidgetAmountText(amountText).catch((cause: unknown) => {
+      console.warn('Unable to save the converter amount.', cause);
+    });
+  }, [amountLoaded, amountText]);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (nextState) => {
+      const resumed = appState.current !== 'active' && nextState === 'active';
+      appState.current = nextState;
+      if (resumed) {
+        void refetch();
+        void readWidgetAmountText()
+          .then(setAmountText)
+          .catch((cause: unknown) => {
+            console.warn('Unable to refresh the saved widget amount.', cause);
+          });
+      }
+    });
+
+    return () => subscription.remove();
+  }, [refetch]);
 
   const topPadding = insets.top + (Platform.OS === 'web' ? 67 : 24);
   const bottomPadding = insets.bottom + (Platform.OS === 'web' ? 34 : 24);
-  const errorMessage = error
+  const errorMessage = error || (rates !== undefined && !ratesAreValid)
     ? 'We could not update the rates. Check your connection and try again.'
     : null;
   const lastUpdated = dataUpdatedAt ? new Date(dataUpdatedAt) : null;
 
   useEffect(() => {
     if (!rates) return;
+    if (!isApiRates(rates)) {
+      console.warn('Skipping widget update because the rates response is invalid.', rates);
+      return;
+    }
+    if (!amountLoaded) return;
+    const widgetAmount = parseWidgetAmount(amountText);
+    if (widgetAmount === null) return;
 
     const widgetRates = {
       usdToIls: rates.usdToIls,
       eurToIls: rates.eurToIls,
-      updatedAt: rates.date,
+      updatedAt: dataUpdatedAt
+        ? new Date(dataUpdatedAt).toISOString()
+        : new Date().toISOString(),
+      rateDate: rates.date,
+      amount: widgetAmount,
     };
 
     if (Platform.OS === 'android') {
       void import('../widgets/android/update')
         .then(({ updateAndroidRateWidget }) => updateAndroidRateWidget(widgetRates))
-        .catch(() => undefined);
+        .catch((cause: unknown) => {
+          console.warn('Unable to update the Android rate widget.', cause);
+        });
     } else if (Platform.OS === 'ios') {
       void import('../widgets/ios/update')
         .then(({ updateIosRateWidget }) => updateIosRateWidget(widgetRates))
         .catch(() => undefined);
     }
-  }, [rates]);
+  }, [amountLoaded, amountText, dataUpdatedAt, rates]);
 
   return (
     <KeyboardAvoidingView
@@ -234,16 +318,16 @@ export default function CurrencyConverterScreen() {
               colors={colors}
               currency="USD"
               symbol="$"
-              rate={rates?.usdToIls}
-              total={rates ? amount * rates.usdToIls : undefined}
+              rate={ratesAreValid ? rates.usdToIls : undefined}
+              total={ratesAreValid ? amount * rates.usdToIls : undefined}
               accent={colors.usdAccent}
             />
             <RateCard
               colors={colors}
               currency="EUR"
               symbol="€"
-              rate={rates?.eurToIls}
-              total={rates ? amount * rates.eurToIls : undefined}
+              rate={ratesAreValid ? rates.eurToIls : undefined}
+              total={ratesAreValid ? amount * rates.eurToIls : undefined}
               accent={colors.eurAccent}
             />
           </View>

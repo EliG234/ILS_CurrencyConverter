@@ -64,7 +64,10 @@ export default function RootLayout() {
     <>
       <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
       {Platform.OS === 'android' ? (
-        <NavigationBar style={scheme === 'dark' ? 'light' : 'dark'} />
+        <NavigationBar
+          style={scheme === 'dark' ? 'light' : 'dark'}
+          hidden={false}
+        />
       ) : null}
       <SafeAreaProvider>
         <ErrorBoundary>
