@@ -1,0 +1,49 @@
+diff --git a/Common/NativeView/CMakeLists.txt b/Common/NativeView/CMakeLists.txt
+index a915e5b03c09ed0f526ff00b2caea03c983ffbc7..a874f552ddfca761e03fac9f43600f2c5ea64dce 100644
+--- a/Common/NativeView/CMakeLists.txt
++++ b/Common/NativeView/CMakeLists.txt
+@@ -5,7 +5,7 @@ set(ANDROID_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../android)
+ set(CODEGEN_JNI_DIR ${ANDROID_DIR}/build/generated/source/codegen/jni)
+ set(CODEGEN_COMPONENTS_DIR ${CODEGEN_JNI_DIR}/react/renderer/components/rnreanimated)
+ file(
+-  GLOB CODEGEN_ORIGINAL_SRCS CONFIGURE_DEPENDS
++  GLOB CODEGEN_ORIGINAL_SRCS
+   ${CODEGEN_JNI_DIR}/*.cpp
+   ${CODEGEN_COMPONENTS_DIR}/*.cpp
+ )
+@@ -13,7 +13,7 @@ file(
+ set(CODEGEN_OVERWRITTEN_JNI_DIR .)
+ set(CODEGEN_OVERWRITTEN_COMPONENTS_DIR ${CODEGEN_OVERWRITTEN_JNI_DIR}/react/renderer/components/rnreanimated)
+ file(
+-  GLOB CODEGEN_OVERWRITTEN_SRCS CONFIGURE_DEPENDS
++  GLOB CODEGEN_OVERWRITTEN_SRCS
+   ${CODEGEN_OVERWRITTEN_JNI_DIR}/*.cpp
+   ${CODEGEN_OVERWRITTEN_COMPONENTS_DIR}/*.cpp
+ )
+diff --git a/android/CMakeLists.txt b/android/CMakeLists.txt
+index 2e22d0d17d6b91d628c90969bda4d6fa0bdb04d9..4dcee94e528bebb9628e05273bee22eb5167724c 100644
+--- a/android/CMakeLists.txt
++++ b/android/CMakeLists.txt
+@@ -1,6 +1,7 @@
+ project(Reanimated)
+ cmake_minimum_required(VERSION 3.16)
+ 
++set(CMAKE_SUPPRESS_REGENERATION ON)
+ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+ 
+ set(CMAKE_CXX_STANDARD 20)
+@@ -37,11 +38,11 @@ set(NATIVEVIEW_DIR "${CMAKE_SOURCE_DIR}/../Common/NativeView")
+ set(PACKAGE_ROOT_DIR "${CMAKE_SOURCE_DIR}/..")
+ set(CODEGEN_OUTPUT_DIR "${BUILD_DIR}/generated/source/codegen/jni")
+ 
+-file(GLOB_RECURSE REANIMATED_COMMON_CPP_SOURCES CONFIGURE_DEPENDS
++file(GLOB_RECURSE REANIMATED_COMMON_CPP_SOURCES
+      "${COMMON_CPP_DIR}/reanimated/*.cpp")
+-file(GLOB_RECURSE REANIMATED_ANDROID_CPP_SOURCES CONFIGURE_DEPENDS
++file(GLOB_RECURSE REANIMATED_ANDROID_CPP_SOURCES
+      "${ANDROID_CPP_DIR}/reanimated/*.cpp")
+-file(GLOB_RECURSE REANIMATED_NATIVEVIEW_CPP_SOURCES CONFIGURE_DEPENDS
++file(GLOB_RECURSE REANIMATED_NATIVEVIEW_CPP_SOURCES
+      "${NATIVEVIEW_DIR}/react/renderer/components/rnreanimated/*.cpp")
+ 
+ find_package(fbjni REQUIRED CONFIG)

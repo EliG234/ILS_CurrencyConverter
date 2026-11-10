@@ -1,0 +1,78 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /rates:
+    get:
+      operationId: getRates
+      tags: [rates]
+      summary: Get current USD and EUR rates in ILS
+      description: Fetches EUR-based rates from Frankfurter and derives the USD to ILS rate.
+      responses:
+        "200":
+          description: Current currency rates
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExchangeRates"
+        "502":
+          description: Upstream rates service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+    ExchangeRates:
+      type: object
+      properties:
+        usdToIls:
+          type: number
+        eurToIls:
+          type: number
+        date:
+          type: string
+        base:
+          type: string
+      required:
+        - usdToIls
+        - eurToIls
+        - date
+        - base
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+        - message
+
