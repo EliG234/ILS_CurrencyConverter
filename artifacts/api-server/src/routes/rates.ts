@@ -8,7 +8,7 @@ type FrankfurterResponse = {
 };
 
 const router: IRouter = Router();
-const FRANKFURTER_URL = "https://api.frankfurter.app/latest?to=USD,ILS";
+const FRANKFURTER_URL = "https://api.frankfurter.dev/v1/latest?to=USD,ILS";
 
 router.get("/rates", async (req, res) => {
   try {
