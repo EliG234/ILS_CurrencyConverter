@@ -6,37 +6,93 @@ export type WidgetRates = {
   amount: number;
 };
 
-function getApiBaseUrl() {
-  const domain = process.env.EXPO_PUBLIC_DOMAIN;
-  if (!domain) {
-    throw new Error('EXPO_PUBLIC_DOMAIN is not configured for widget updates.');
-  }
-  return `https://${domain}`;
-}
+const FRANKFURTER_URL = 'https://api.frankfurter.app/latest?to=USD,ILS';
 
-export async function fetchWidgetRates(amount = 1): Promise<WidgetRates> {
-  const response = await fetch(`${getApiBaseUrl()}/api/rates`);
+export async function fetchLiveRatesFromFrankfurter(): Promise<{
+  usdToIls: number;
+  eurToIls: number;
+  date: string;
+}> {
+  const response = await fetch(FRANKFURTER_URL);
   if (!response.ok) {
-    throw new Error(`Rates request failed with status ${response.status}.`);
+    throw new Error(`Frankfurter rates request failed with status ${response.status}.`);
   }
 
-  const payload = (await response.json()) as Partial<WidgetRates> & {
+  const data = (await response.json()) as {
     date?: string;
+    rates?: {
+      USD?: number;
+      ILS?: number;
+    };
   };
-  const rateDate = payload.rateDate ?? payload.date;
+
+  const eurToUsd = data.rates?.USD;
+  const eurToIls = data.rates?.ILS;
+
   if (
-    typeof payload.usdToIls !== 'number' ||
-    typeof payload.eurToIls !== 'number' ||
-    typeof rateDate !== 'string'
+    typeof eurToUsd !== 'number' ||
+    typeof eurToIls !== 'number' ||
+    typeof data.date !== 'string' ||
+    eurToUsd <= 0
   ) {
-    throw new Error('Rates response did not contain the expected values.');
+    throw new Error('Frankfurter response did not contain expected values.');
   }
 
   return {
-    usdToIls: payload.usdToIls,
-    eurToIls: payload.eurToIls,
+    usdToIls: eurToIls / eurToUsd,
+    eurToIls,
+    date: data.date,
+  };
+}
+
+function getApiBaseUrl(): string | null {
+  const domain = process.env.EXPO_PUBLIC_DOMAIN?.trim();
+  if (!domain) return null;
+  const cleaned = domain.replace(/^https?:\/\//i, '').replace(/\/+$/, '');
+  return cleaned ? `https://${cleaned}` : null;
+}
+
+export async function fetchWidgetRates(amount = 1): Promise<WidgetRates> {
+  let rateData: { usdToIls: number; eurToIls: number; date: string } | null = null;
+
+  const baseUrl = getApiBaseUrl();
+  if (baseUrl) {
+    try {
+      const response = await fetch(`${baseUrl}/api/rates`);
+      if (response.ok) {
+        const text = await response.text();
+        if (!text.trim().startsWith('<')) {
+          const payload = JSON.parse(text) as Record<string, unknown>;
+          const rateDate = (payload.rateDate ?? payload.date) as string | undefined;
+          if (
+            typeof payload.usdToIls === 'number' &&
+            Number.isFinite(payload.usdToIls) &&
+            typeof payload.eurToIls === 'number' &&
+            Number.isFinite(payload.eurToIls) &&
+            typeof rateDate === 'string'
+          ) {
+            rateData = {
+              usdToIls: payload.usdToIls,
+              eurToIls: payload.eurToIls,
+              date: rateDate,
+            };
+          }
+        }
+      }
+    } catch {
+      // Fall through to direct Frankfurter fetch
+    }
+  }
+
+  if (!rateData) {
+    rateData = await fetchLiveRatesFromFrankfurter();
+  }
+
+  return {
+    usdToIls: rateData.usdToIls,
+    eurToIls: rateData.eurToIls,
     updatedAt: new Date().toISOString(),
-    rateDate,
+    rateDate: rateData.date,
     amount,
   };
 }

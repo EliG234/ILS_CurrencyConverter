@@ -11,13 +11,15 @@ export function parseWidgetAmount(text: string): number | null {
 
 export async function readWidgetAmountText(): Promise<string> {
   const storedAmount = await AsyncStorage.getItem(WIDGET_AMOUNT_KEY);
-  return storedAmount !== null && parseWidgetAmount(storedAmount) !== null
-    ? storedAmount
-    : DEFAULT_WIDGET_AMOUNT;
+  if (storedAmount === null) return DEFAULT_WIDGET_AMOUNT;
+  if (storedAmount === '' || parseWidgetAmount(storedAmount) !== null) {
+    return storedAmount;
+  }
+  return DEFAULT_WIDGET_AMOUNT;
 }
 
 export async function saveWidgetAmountText(text: string): Promise<void> {
-  if (parseWidgetAmount(text) === null) return;
+  if (text !== '' && parseWidgetAmount(text) === null) return;
   await AsyncStorage.setItem(WIDGET_AMOUNT_KEY, text);
 }
 

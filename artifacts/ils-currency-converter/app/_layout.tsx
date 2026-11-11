@@ -22,11 +22,12 @@ import { useColors } from '@/hooks/useColors';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
-setBaseUrl(
-  process.env.EXPO_PUBLIC_DOMAIN
-    ? `https://${process.env.EXPO_PUBLIC_DOMAIN}`
-    : null,
-);
+const domain = process.env.EXPO_PUBLIC_DOMAIN?.trim();
+const cleanedDomain = domain
+  ? domain.replace(/^https?:\/\//i, '').replace(/\/+$/, '')
+  : null;
+
+setBaseUrl(cleanedDomain ? `https://${cleanedDomain}` : null);
 
 const queryClient = new QueryClient();
 

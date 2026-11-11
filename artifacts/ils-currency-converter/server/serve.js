@@ -126,12 +126,59 @@ function serveStaticFile(urlPath, res) {
 const landingPageTemplate = fs.readFileSync(TEMPLATE_PATH, 'utf-8');
 const appName = getAppName();
 
-const server = http.createServer((req, res) => {
+const server = http.createServer(async (req, res) => {
   const url = new URL(req.url || '/', `http://${req.headers.host}`);
   let pathname = url.pathname;
 
   if (basePath && pathname.startsWith(basePath)) {
     pathname = pathname.slice(basePath.length) || '/';
+  }
+
+  if (pathname === '/api/rates') {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+    if (req.method === 'OPTIONS') {
+      res.writeHead(204);
+      res.end();
+      return;
+    }
+
+    try {
+      const upstream = await fetch('https://api.frankfurter.app/latest?to=USD,ILS');
+      if (!upstream.ok) {
+        res.writeHead(502, { 'content-type': 'application/json' });
+        res.end(JSON.stringify({ message: 'Rates service is temporarily unavailable.' }));
+        return;
+      }
+      const data = await upstream.json();
+      const eurToUsd = data.rates?.USD;
+      const eurToIls = data.rates?.ILS;
+      if (!eurToUsd || !eurToIls) {
+        res.writeHead(502, { 'content-type': 'application/json' });
+        res.end(JSON.stringify({ message: 'Rates service returned incomplete data.' }));
+        return;
+      }
+      const result = {
+        usdToIls: eurToIls / eurToUsd,
+        eurToIls,
+        date: data.date,
+        base: data.base || 'EUR',
+      };
+      res.writeHead(200, { 'content-type': 'application/json' });
+      res.end(JSON.stringify(result));
+    } catch (err) {
+      res.writeHead(502, { 'content-type': 'application/json' });
+      res.end(JSON.stringify({ message: 'Rates service is temporarily unavailable.' }));
+    }
+    return;
+  }
+
+  if (pathname === '/api/healthz') {
+    res.writeHead(200, { 'content-type': 'application/json' });
+    res.end(JSON.stringify({ status: 'ok' }));
+    return;
   }
 
   if (pathname === '/' || pathname === '/manifest') {

@@ -4,35 +4,11 @@ import {
 } from 'react-native-android-widget';
 
 import { ILSRateWidget } from './ILSRateWidget';
-import { adjustWidgetAmount, readWidgetAmountText, parseWidgetAmount } from '../amount';
-import { fetchWidgetRates, type WidgetRates } from '../rates';
-
-function getRatesFromClickActionData(
-  data?: Record<string, unknown>,
-): Omit<WidgetRates, 'amount'> | null {
-  if (
-    typeof data?.usdToIls !== 'number' ||
-    !Number.isFinite(data.usdToIls) ||
-    typeof data.eurToIls !== 'number' ||
-    !Number.isFinite(data.eurToIls) ||
-    typeof data.updatedAt !== 'string' ||
-    typeof data.rateDate !== 'string'
-  ) {
-    return null;
-  }
-
-  return {
-    usdToIls: data.usdToIls,
-    eurToIls: data.eurToIls,
-    updatedAt: data.updatedAt,
-    rateDate: data.rateDate,
-  };
-}
+import { fetchWidgetRates } from '../rates';
 
 export const widgetTaskHandler: WidgetTaskHandler = async ({
+  widgetInfo,
   widgetAction,
-  clickAction,
-  clickActionData,
   renderWidget,
 }) => {
   if (
@@ -45,31 +21,11 @@ export const widgetTaskHandler: WidgetTaskHandler = async ({
   }
 
   try {
-    let amountText = await readWidgetAmountText();
-
-    if (widgetAction === 'WIDGET_CLICK') {
-      if (clickAction === 'INCREASE_AMOUNT') {
-        amountText = await adjustWidgetAmount('increase');
-      } else if (clickAction === 'DECREASE_AMOUNT') {
-        amountText = await adjustWidgetAmount('decrease');
-      } else {
-        return;
-      }
-
-      const cachedRates = getRatesFromClickActionData(clickActionData);
-      const amount = parseWidgetAmount(amountText) ?? 1;
-      if (cachedRates) {
-        renderWidget(<ILSRateWidget rates={{ ...cachedRates, amount }} />);
-        return;
-      }
-    }
-
-    const amount = parseWidgetAmount(amountText) ?? 1;
-    const rates = await fetchWidgetRates(amount);
-    renderWidget(<ILSRateWidget rates={rates} />);
+    const rates = await fetchWidgetRates();
+    renderWidget(<ILSRateWidget rates={rates} widgetInfo={widgetInfo} />);
   } catch (cause) {
     console.warn('Unable to load rates for the Android widget.', cause);
-    renderWidget(<ILSRateWidget error />);
+    renderWidget(<ILSRateWidget error widgetInfo={widgetInfo} />);
   }
 };
 

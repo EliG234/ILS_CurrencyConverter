@@ -17,6 +17,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
   getGetRatesQueryKey,
+  getRates,
   useGetRates,
 } from '@workspace/api-client-react';
 import { useColors } from '@/hooks/useColors';
@@ -25,6 +26,7 @@ import {
   readWidgetAmountText,
   saveWidgetAmountText,
 } from '../widgets/amount';
+import { fetchLiveRatesFromFrankfurter } from '../widgets/rates';
 
 function formatAmount(value: number) {
   return new Intl.NumberFormat('en-US', {
@@ -83,11 +85,14 @@ function RateCard({
               {symbol}
             </Text>
           </View>
-          <View>
+          <View style={styles.currencyTextContainer}>
             <Text style={[styles.currencyCode, { color: colors.foreground }]}>
               {currency}
             </Text>
-            <Text style={[styles.currencyPair, { color: colors.mutedForeground }]}>
+            <Text
+              style={[styles.currencyPair, { color: colors.mutedForeground }]}
+              numberOfLines={1}
+            >
               {currency} to ILS
             </Text>
           </View>
@@ -103,7 +108,11 @@ function RateCard({
             <ActivityIndicator size="small" color={accent} />
           </View>
         ) : (
-          <Text style={[styles.rateValue, { color: colors.foreground }]}>
+          <Text
+            style={[styles.rateValue, { color: colors.foreground }]}
+            numberOfLines={1}
+            adjustsFontSizeToFit
+          >
             ₪{rate.toFixed(2)}
           </Text>
         )}
@@ -117,7 +126,11 @@ function RateCard({
       {isLoading ? (
         <View style={[styles.totalSkeleton, { backgroundColor: colors.muted }]} />
       ) : (
-        <Text style={[styles.totalValue, { color: colors.foreground }]}>
+        <Text
+          style={[styles.totalValue, { color: colors.foreground }]}
+          numberOfLines={1}
+          adjustsFontSizeToFit
+        >
           ₪{formatAmount(total)}
         </Text>
       )}
@@ -143,6 +156,24 @@ export default function CurrencyConverterScreen() {
       refetchInterval: 6 * 60 * 60 * 1000,
       refetchIntervalInBackground: false,
       staleTime: 0,
+      queryFn: async ({ signal }) => {
+        try {
+          const apiRates = await getRates({ signal });
+          if (isApiRates(apiRates)) {
+            return apiRates;
+          }
+        } catch {
+          // Fall through to direct Frankfurter fetch
+        }
+
+        const live = await fetchLiveRatesFromFrankfurter();
+        return {
+          usdToIls: live.usdToIls,
+          eurToIls: live.eurToIls,
+          date: live.date,
+          base: 'EUR',
+        };
+      },
     },
   });
   const ratesAreValid = isApiRates(rates);
@@ -172,7 +203,7 @@ export default function CurrencyConverterScreen() {
   }, []);
 
   useEffect(() => {
-    if (!amountLoaded || parseWidgetAmount(amountText) === null) return;
+    if (!amountLoaded || (amountText !== '' && parseWidgetAmount(amountText) === null)) return;
     void saveWidgetAmountText(amountText).catch((cause: unknown) => {
       console.warn('Unable to save the converter amount.', cause);
     });
@@ -208,9 +239,6 @@ export default function CurrencyConverterScreen() {
       console.warn('Skipping widget update because the rates response is invalid.', rates);
       return;
     }
-    if (!amountLoaded) return;
-    const widgetAmount = parseWidgetAmount(amountText);
-    if (widgetAmount === null) return;
 
     const widgetRates = {
       usdToIls: rates.usdToIls,
@@ -219,7 +247,7 @@ export default function CurrencyConverterScreen() {
         ? new Date(dataUpdatedAt).toISOString()
         : new Date().toISOString(),
       rateDate: rates.date,
-      amount: widgetAmount,
+      amount: parseWidgetAmount(amountText) ?? 1,
     };
 
     if (Platform.OS === 'android') {
@@ -233,7 +261,7 @@ export default function CurrencyConverterScreen() {
         .then(({ updateIosRateWidget }) => updateIosRateWidget(widgetRates))
         .catch(() => undefined);
     }
-  }, [amountLoaded, amountText, dataUpdatedAt, rates]);
+  }, [amountText, dataUpdatedAt, rates]);
 
   return (
     <KeyboardAvoidingView
@@ -469,11 +497,13 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   cards: {
+    flexDirection: 'row',
     gap: 10,
   },
   rateCard: {
-    borderRadius: 19,
-    padding: 14,
+    flex: 1,
+    borderRadius: 18,
+    padding: 12,
     overflow: 'hidden',
     elevation: 2,
   },
@@ -482,7 +512,7 @@ const styles = StyleSheet.create({
     left: 0,
     top: 0,
     bottom: 0,
-    width: 5,
+    width: 4,
   },
   cardTopRow: {
     flexDirection: 'row',
@@ -492,22 +522,26 @@ const styles = StyleSheet.create({
   currencyIdentity: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 11,
+    gap: 8,
+    flex: 1,
+  },
+  currencyTextContainer: {
+    flex: 1,
   },
   currencyIcon: {
-    width: 34,
-    height: 34,
-    borderRadius: 11,
+    width: 32,
+    height: 32,
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },
   currencySymbol: {
     fontFamily: 'Inter_700Bold',
-    fontSize: 18,
+    fontSize: 16,
   },
   currencyCode: {
     fontFamily: 'Inter_700Bold',
-    fontSize: 15,
+    fontSize: 14,
     letterSpacing: 0.3,
   },
   currencyPair: {
@@ -518,20 +552,21 @@ const styles = StyleSheet.create({
   rateLine: {
     flexDirection: 'row',
     alignItems: 'baseline',
-    marginTop: 9,
-    gap: 5,
+    marginTop: 8,
+    gap: 4,
+    flexWrap: 'wrap',
   },
   ratePrefix: {
     fontFamily: 'Inter_500Medium',
-    fontSize: 13,
+    fontSize: 11,
   },
   rateValue: {
     fontFamily: 'Inter_700Bold',
-    fontSize: 19,
+    fontSize: 16,
     letterSpacing: -0.3,
   },
   loadingRate: {
-    height: 22,
+    height: 20,
     justifyContent: 'center',
   },
   cardDivider: {
@@ -540,21 +575,21 @@ const styles = StyleSheet.create({
   },
   totalCaption: {
     fontFamily: 'Inter_500Medium',
-    fontSize: 10,
+    fontSize: 9,
     letterSpacing: 0.4,
     textTransform: 'uppercase',
   },
   totalValue: {
     fontFamily: 'Inter_700Bold',
-    fontSize: 29,
-    letterSpacing: -0.8,
+    fontSize: 22,
+    letterSpacing: -0.6,
     marginTop: 1,
   },
   totalSkeleton: {
     borderRadius: 6,
-    height: 33,
+    height: 26,
     marginTop: 1,
-    width: 132,
+    width: '80%',
   },
   errorBox: {
     alignItems: 'center',

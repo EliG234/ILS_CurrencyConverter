@@ -27,8 +27,10 @@
               "name": "ILSRateWidget",
               "label": "ILS Rates",
               "description": "Live US dollar and euro rates in Israeli shekels.",
-              "minWidth": "250dp",
-              "minHeight": "150dp",
+              "minWidth": "180dp",
+              "minHeight": "40dp",
+              "targetCellWidth": 3,
+              "targetCellHeight": 1,
               "resizeMode": "horizontal|vertical",
               "updatePeriodMillis": 1800000
             }
