@@ -278,7 +278,10 @@ export default function CurrencyConverterScreen() {
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="interactive"
       >
-        <Pressable onPress={Keyboard.dismiss} style={styles.pressableContent}>
+        <Pressable
+          onPress={Platform.OS === 'web' ? undefined : Keyboard.dismiss}
+          style={styles.pressableContent}
+        >
           <View style={styles.header}>
             <View style={styles.eyebrowRow}>
               <View style={[styles.liveDot, { backgroundColor: colors.success }]} />
@@ -321,7 +324,7 @@ export default function CurrencyConverterScreen() {
                 keyboardType="decimal-pad"
                 inputMode="decimal"
                 returnKeyType="done"
-                selectTextOnFocus
+                selectTextOnFocus={Platform.OS !== 'web'}
                 placeholder="1"
                 placeholderTextColor={`${colors.primaryForeground}99`}
                 style={[styles.amountInput, { color: colors.primaryForeground }]}
